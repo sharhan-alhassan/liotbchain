@@ -4,19 +4,19 @@ with open('README.md', 'r') as f:
     long_description = f.read()
 
 with open("requirements.txt", "r", encoding="utf-8") as fh:
-    requirements = fh.read()
+    requirements = fh.read().splitlines()
 
 setup(
-    name='paystackpy',
+    name='liotbchain',
     version='0.0.1',
-    description='Python Lightweight IOT Blockchain framework ',
+    description='Python Lightweight IOT Blockchain framework',
     long_description=long_description,
     long_description_content_type='text/markdown',
     author='Sharhan Alhassan',
     author_email='sharhanalhassan@gmail.com',
     url='https://github.com/sharhan-alhassan/liotbchain',
     packages=find_packages(exclude=['tests']),
-    install_requires=[requirements],
+    install_requires=requirements,
     keywords='blockchain python iot framework',
     classifiers=[
         'Programming Language :: Python :: 3',

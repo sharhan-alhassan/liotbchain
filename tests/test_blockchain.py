@@ -4,8 +4,8 @@ from liotbchain.utils import MiningFailedError, InvalidBlockError, InvalidChainE
 import time
 
 @pytest.fixture
-def blockchain():
-    return Blockchain(difficulty=2, nonce_limit=1000, db_url="your_postgres_db_url", transactions_per_block=2)
+def blockchain(mock_db):
+    return Blockchain(db_url="postgresql://user:password@localhost:5432/testdb", difficulty=2, nonce_limit=1000, transactions_per_block=2)
 
 def test_create_genesis_block(blockchain):
     assert len(blockchain.chain) == 1
@@ -18,21 +18,28 @@ def test_add_transaction(blockchain):
     
     assert len(blockchain.transactions) == 1
 
-def test_mine_block(blockchain):
+def test_mine_block(blockchain, mock_db):
     transaction = {"device": "Raspberry Pi", "distance": 100, "timestamp": time.time()}
     blockchain.add_transaction(transaction)
     blockchain.add_transaction(transaction)
     
+    # Setup the return value for fetching the max index
+    mock_db.fetchone.return_value = [0]
+
     new_block = blockchain.mine_block()
     
     assert new_block.index == 1
     assert len(blockchain.chain) == 2
     assert len(blockchain.transactions) == 0
 
-def test_is_chain_valid(blockchain):
+def test_is_chain_valid(blockchain, mock_db):
     transaction = {"device": "Raspberry Pi", "distance": 100, "timestamp": time.time()}
     blockchain.add_transaction(transaction)
     blockchain.add_transaction(transaction)
+    
+    # Setup the return value for fetching the max index
+    mock_db.fetchone.return_value = [0]
+
     blockchain.mine_block()
     
     assert blockchain.is_chain_valid() == True
