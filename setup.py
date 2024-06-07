@@ -8,7 +8,7 @@ with open("requirements.txt", "r", encoding="utf-8") as fh:
 
 setup(
     name='liotbchain',
-    version='0.0.2',
+    version='0.0.3',
     description='Python Lightweight IOT Blockchain framework',
     long_description=long_description,
     long_description_content_type='text/markdown',
