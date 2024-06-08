@@ -1,0 +1,101 @@
+name: Publish liotbchain to pypi.org
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  create_release:
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Get current version from setup.py
+        id: get_version
+        run: |
+          VERSION=$(python3 setup.py --version)
+          echo "Current version is $VERSION"
+          echo "::set-output name=current_version::$VERSION"
+        
+      - name: Increment version if tag exists
+        id: increment_version
+        run: |
+          VERSION=${{ steps.get_version.outputs.current_version }}
+          echo "Checking if tag $VERSION exists..."
+          if git rev-parse "v$VERSION" >/dev/null 2>&1; then
+            echo "Tag v$VERSION already exists. Incrementing version..."
+            IFS='.' read -r -a VERSION_PARTS <<< "$VERSION"
+            VERSION_PARTS[2]=$((VERSION_PARTS[2]+1))
+            NEW_VERSION="${VERSION_PARTS[0]}.${VERSION_PARTS[1]}.${VERSION_PARTS[2]}"
+            echo "New version is $NEW_VERSION"
+            sed -i "s/version='$VERSION'/version='$NEW_VERSION'/" setup.py
+            git config --global user.name 'github-actions'
+            git config --global user.email 'github-actions@github.com'
+            git commit -am "Bump version to $NEW_VERSION"
+            git tag "v$NEW_VERSION"
+            git push origin main --tags
+            echo "::set-output name=new_version::$NEW_VERSION"
+          else
+            echo "Tag v$VERSION does not exist. Using current version."
+            echo "::set-output name=new_version::$VERSION"
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.increment_version.outputs.new_version }}
+          release_name: Release v${{ steps.increment_version.outputs.new_version }}
+          body: |
+            New release v${{ steps.increment_version.outputs.new_version }}.
+          draft: false
+          prerelease: false
+
+  publish_to_pypi:
+    runs-on: ubuntu-latest
+    needs: create_release
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: v${{ needs.create_release.outputs.new_version }}  # Checkout the newly created tag
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install Build package
+        run: |
+          python3 -m pip install --upgrade build
+          
+      - name: Build package
+        run: |
+          python3 -m build
+
+      - name: Run Tests
+        run: |
+          python3 -m pip install -r requirements.txt
+          pytest
+
+      - name: Publish package
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}

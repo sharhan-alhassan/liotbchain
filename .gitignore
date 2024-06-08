@@ -162,5 +162,4 @@ cython_debug/
 #.idea/
 
 # Others
-liotbchain_sqlite_archive
-local_utilities
+local_utilities/*
