@@ -7,7 +7,7 @@ import time
 def main():
     try:
         # Create a new Blockchain instance with a specified difficulty level
-        my_blockchain = Blockchain(difficulty=3)  # You can adjust the difficulty for testing
+        my_blockchain = Blockchain()  # You can adjust the difficulty for testing
 
         # Data from IoT devices
         iot_data = [

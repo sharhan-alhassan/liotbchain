@@ -1,4 +1,6 @@
 import os
+from dotenv import load_dotenv, find_dotenv
+load_dotenv(find_dotenv(), override=True)
 
 # Database URL for PostgreSQL database connection
 DATABASE_URL = os.getenv("DATABASE_URL", "default_db_url")
