@@ -3,7 +3,7 @@ name: Publish liotbchain to pypi.org
 on:
   push:
     branches:
-      - main
+      - " "
 
 jobs:
   create_release:
