@@ -15,6 +15,7 @@ class Blockchain:
         chain (list): A list of blocks that form the blockchain.
         difficulty (int): The number of leading zeros required in the hash.
         transactions (list): A list to hold transactions temporarily until a block is created.
+        transactions_per_block (int): The number of transactions to be grouped into a single block.
         nonce_limit (int): The maximum limit for nonce to prevent infinite loops.
     """
     def __init__(self, difficulty=None, nonce_limit=None, db_url=None, transactions_per_block=None):
@@ -27,6 +28,7 @@ class Blockchain:
             raise DatabaseConfigurationError("Database URL is missing. Please provide a valid DATABASE_URL.")
         self.transactions_per_block = transactions_per_block or TRANSACTIONS_PER_BLOCK
         self.initialize_blockchain()
+
 
     def create_genesis_block(self):
         """
@@ -41,6 +43,7 @@ class Blockchain:
         save_block(genesis_block, self.db_url)  # Save the genesis block to the database
         logger.info(f"Genesis block created with index: {genesis_block.index}")
 
+
     def initialize_blockchain(self):
         """
         Initializes the blockchain by creating the database and loading existing blocks from the database.
@@ -54,12 +57,14 @@ class Blockchain:
             self.create_genesis_block()
         logger.info(f"Blockchain initialized with {len(self.chain)} blocks.")
 
+
     def save_blockchain(self):
         """
         Saves the entire blockchain to the database.
         """
         for block in self.chain:
             save_block(block, self.db_url)
+
 
     def add_block(self, block):
         """
@@ -73,7 +78,7 @@ class Blockchain:
         """
         try:
             block.previous_hash = self.get_latest_block().hash
-            block.merkle_root = block.calculate_merkle_root()  # Calculate the Merkle root before hashing
+            # block.merkle_root = block.calculate_merkle_root()  # Calculate the Merkle root before hashing
             block.hash = self.proof_of_work(block)  # Calculate the hash after setting previous_hash and merkle_root
             self.chain.append(block)
             save_block(block, self.db_url)  # Save the updated blockchain to the database
@@ -81,6 +86,7 @@ class Blockchain:
         except Exception as e:
             logger.error(f"Error in add_block: {str(e)}")
             raise InvalidBlockError(f"Failed to add block: {str(e)}")
+
 
     def proof_of_work(self, block):
         """
@@ -97,6 +103,7 @@ class Blockchain:
         """
         block.nonce = 0
         block.hash = block.calculate_hash()
+        block.merkle_root = block.calculate_merkle_root()
         while not block.hash.startswith('0' * self.difficulty):
             block.nonce += 1
             block.hash = block.calculate_hash()
@@ -184,9 +191,9 @@ class Blockchain:
 
     def get_chain(self):
         """
-        Retrieves the entire blockchain.
+        Retrieves the entire blockchain from the database.
 
         Returns:
             list: The list of blocks that comprise the blockchain.
         """
-        return self.chain
+        return load_blocks(self.db_url)

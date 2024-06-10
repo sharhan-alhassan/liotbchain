@@ -12,7 +12,7 @@ def main():
         # Data from IoT devices
         iot_data = [
             {"device": "Raspberry Pi 1", "distance": 120, "timestamp": time.time()},
-            {"device": "Raspberry Pi 2", "distance": 150, "timestamp": time.time()},
+            {"device": "Raspberry Pi 2", "distance": 151, "timestamp": time.time()},
             {"device": "Raspberry Pi 3", "distance": 130, "timestamp": time.time()},
             {"device": "Raspberry Pi 4", "distance": 140, "timestamp": time.time()},
         ]
@@ -22,10 +22,17 @@ def main():
             my_blockchain.add_transaction(data)
             print(f"Transaction added for device {data['device']}.")
 
+        # # Display the blockchain
+        # print("\nFull Blockchain:")
+        # for block in my_blockchain.get_chain():
+        #     print(f"Block {block.index}: Transactions={block.data}, Nonce={block.nonce}, Hash={block.hash}, Merkle Root={block.calculate_merkle_root()}")
+
         # Display the blockchain
         print("\nFull Blockchain:")
         for block in my_blockchain.get_chain():
-            print(f"Block {block.index}: Transactions={block.data}, Nonce={block.nonce}, Hash={block.hash}, Merkle Root={block.calculate_merkle_root()}")
+            # print(f"Full block: {block}")
+            print(f"Block {block.index}: Transactions={block.data}, Timestamp-{block.timestamp}, Nonce={block.nonce}, Previous Hash={block.previous_hash}, Hash={block.hash}")
+
 
         # Validate the integrity of the blockchain
         if my_blockchain.is_chain_valid():

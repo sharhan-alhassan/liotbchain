@@ -14,15 +14,18 @@ class Block:
         data (list): The transactions stored within the block.
         previous_hash (str): The hash of the block's predecessor.
         nonce (int): The nonce used for the proof-of-work.
+        hash (str): The hash of the current block.
     """
 
-    def __init__(self, index, timestamp, data, previous_hash):
+    def __init__(self, index, timestamp, data, previous_hash, nonce=0, hash=None, merkle_root=None):
         self.index = index
         self.timestamp = timestamp
         self.data = data
         self.previous_hash = previous_hash
-        self.nonce = 0  # Initialize nonce
-        self.hash = None  # Initialize hash
+        self.nonce = nonce
+        self.hash = hash
+        self.merkle_root = merkle_root
+
 
     def calculate_hash(self):
         """

@@ -18,6 +18,13 @@ def create_database(db_url):
         - "previous_hash" (TEXT): The hash of the previous block in the chain.
         - "nonce" (INTEGER): The nonce value used for the proof-of-work algorithm.
         - "hash" (TEXT): The hash of the current block.
+
+    Args:
+        db_url (str): The URL for the PostgreSQL database.
+    
+    Raises:
+        DatabaseConfigurationError: If the database URL is missing.
+        DatabaseConnectionError: If there is an error connecting to the database.
     """
     if not db_url:
         raise DatabaseConfigurationError("Database URL is missing. Please provide a valid DATABASE_URL.")
@@ -45,9 +52,11 @@ def save_block(block, db_url):
     
     Args:
         block (Block): The block to be saved, containing index, data, timestamp, previous_hash, nonce, and hash attributes.
+        db_url (str): The URL for the PostgreSQL database.
     
     Raises:
-        Exception: If there is an error saving the block to the database.
+        DatabaseConfigurationError: If the database URL is missing.
+        DatabaseConnectionError: If there is an error saving the block to the database.
     """
     if not db_url:
         raise DatabaseConfigurationError("Database URL is missing. Please provide a valid DATABASE_URL.")
@@ -73,11 +82,15 @@ def load_blocks(db_url):
     """
     Loads all blocks from the PostgreSQL database in ascending order of their index.
     
+    Args:
+        db_url (str): The URL for the PostgreSQL database.
+    
     Returns:
         list: A list of Block objects loaded from the database.
     
     Raises:
-        Exception: If there is an error loading the blocks from the database.
+        DatabaseConfigurationError: If the database URL is missing.
+        DatabaseConnectionError: If there is an error loading the blocks from the database.
     """
     if not db_url:
         raise DatabaseConfigurationError("Database URL is missing. Please provide a valid DATABASE_URL.")
@@ -91,10 +104,10 @@ def load_blocks(db_url):
                 index=row['index'],
                 timestamp=row['timestamp'],
                 data=json.loads(row['data']),
-                previous_hash=row['previous_hash']
+                previous_hash=row['previous_hash'],
+                nonce=row['nonce'],
+                hash=row['hash'],
             )
-            block.nonce = row['nonce']
-            block.hash = row['hash']
             blocks.append(block)
         conn.close()
         return blocks

@@ -47,6 +47,12 @@ export DIFFICULTY=5
 # Set the nonce limit to prevent infinite loops during mining
 export NONCE_LIMIT=500000
 
+3. Directly set the environment variables in a .env file
+DATABASE_URL=
+TRANSACTIONS_PER_BLOCK=
+DIFFICULTY=
+NONCE_LIMIT=
+
 # Then instantiate the Blockchain() without passing any parameters
 from liotbchain import Blockchain
 blockchain = Blockchain()
@@ -60,15 +66,6 @@ from liotbchain import Blockchain
 # Instantiate the Blockchain with custom parameters
 blockchain = Blockchain(difficulty=5, nonce_limit=500000, db_url="postgresql://username:password@hostname:port/database_name", transactions_per_block=2)
 
-```
-
-## Configuration File
-Alternatively, you can create a `config.py` file in your project root with the following content:
-```sh
-DATABASE_URL = "your_postgres_db_url"
-TRANSACTIONS_PER_BLOCK = 2  # Number of transactions per block
-DIFFICULTY = 4  # Mining difficulty
-NONCE_LIMIT = 1000000  # Limit to prevent infinite loops during mining
 ```
 
 # Usage
